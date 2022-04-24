@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".gravity.GravityActivity">
+
+    <TextView
+        android:id="@+id/maxForceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Maximum Hit Force is "
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/netForceProgressBar"
+        android:layout_width="255dp"
+        android:layout_height="285dp"
+        android:layout_marginTop="9dp"
+        android:indeterminateOnly="false"
+        android:max="8"
+        android:progressDrawable="@drawable/circle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/maxForceTextView"
+        tools:progress="4">
+
+    </ProgressBar>
+
+    <TextView
+        android:id="@+id/netForceTextView"
+        android:layout_width="148dp"
+        android:layout_height="111dp"
+        android:text="00"
+        android:textAlignment="center"
+        android:textSize="80dp"
+        app:layout_constraintBottom_toBottomOf="@+id/netForceProgressBar"
+        app:layout_constraintEnd_toEndOf="@+id/netForceProgressBar"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="@+id/netForceProgressBar"
+        app:layout_constraintTop_toTopOf="@+id/netForceProgressBar" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="76dp"
+        android:text="Force on X-axis"
+        android:textSize="@dimen/forceTextSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/netForceProgressBar" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="24dp"
+        android:text="Force on Y-axis"
+        android:textSize="@dimen/forceTextSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="24dp"
+        android:text="Force on Z-axis"
+        android:textSize="@dimen/forceTextSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <TextView
+        android:id="@+id/forceOnX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:maxLength="6"
+        android:maxLines="1"
+        android:text="010"
+        android:textSize="@dimen/forceTextSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.176"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/netForceProgressBar" />
+
+    <TextView
+        android:id="@+id/forceOnY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:maxLines="1"
+        android:maxLength="6"
+        android:text="010"
+        android:textSize="@dimen/forceTextSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.181"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/forceOnX" />
+
+    <TextView
+        android:id="@+id/forceOnZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:maxLines="1"
+        android:maxLength="6"
+        android:text="010"
+        android:textSize="@dimen/forceTextSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.176"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/forceOnY" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

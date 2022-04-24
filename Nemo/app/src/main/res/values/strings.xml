@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Nemo</string>
+    <string name="text_current_location">Find your Location and share</string>
+    <string name="text_default_location">0.0, 0.0</string>
+    <string name="button_text_find">Use Cell Tower</string>
+    <string name="text_location_format">%f, %f</string>
+    <string name="button_text_find_fused">Use GPS</string>
+    <string name="default_web_client_id" translatable="false">137685633631-271g14c1013j2s8ks7fhl81psp05eevr.apps.googleusercontent.com</string>
+</resources>
