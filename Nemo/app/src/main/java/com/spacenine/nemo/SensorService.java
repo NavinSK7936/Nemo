@@ -1,12 +1,15 @@
 package com.spacenine.nemo;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -31,76 +35,28 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.spacenine.nemo.gravity.ForceDetector;
 import com.spacenine.nemo.gravity.ForceDetectorKt;
+import com.spacenine.nemo.util.FBUtilKt;
+import com.spacenine.nemo.util.PhoneUtilKt;
+import com.spacenine.nemo.util.StringUtilKt;
 
 import java.util.List;
+import java.util.Objects;
+
 import static com.spacenine.nemo.AppKt.*;
 
 public class SensorService extends Service {
 
-    @SuppressLint("MissingPermission")
-    private void doSend(String message0) {
+    SensorManager mSensorManager;
+    Sensor mAccelerometer;
+    ShakeDetector mShakeDetector;
+    ForceDetector mForceDetector;
 
-        // vibrate the phone
-        vibrate();
-
-        // create FusedLocationProviderClient to get the user location
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-
-        // use the PRIORITY_BALANCED_POWER_ACCURACY
-        // so that the service doesn't use unnecessary power via GPS
-        // it will only use GPS at this very moment
-        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
-            @Override
-            public boolean isCancellationRequested() {
-                return false;
-            }
-
-            @NonNull
-            @Override
-            public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
-                return null;
-            }
-        }).addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-
-                Toast.makeText(SensorService.this, "MESSAGE SENT", Toast.LENGTH_SHORT).show();
-
-                SmsManager smsManager = SmsManager.getDefault();
-                DbHelper db = new DbHelper(SensorService.this);
-                List<ContactModel> list = db.getAllContacts();
-
-                String message;
-
-                if (location != null) {
-                    for (ContactModel c : list) {
-                        message = "Hey, " + c.getName() + " " + message0 + " Please urgently reach me out. Here are my coordinates.\n" + "http://maps.google.com/?q=" + location.getLatitude() + "," + location.getLongitude();
-                        smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
-                    }
-                } else {
-                    for (ContactModel c : list) {
-                        message = "Hey, " + c.getName() + " " + message0 + " Please urgently reach me out.\n" + "GPS was turned off. Couldn't find location. Call your nearest Police Station.";
-                        smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
-                    }
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d("Check: ", "OnFailure");
-                String message = "Hey, " + message0 + " Please urgently reach me out.\n" + "GPS was turned off.Couldn't find location. Call your nearest Police Station.";
-
-                SmsManager smsManager = SmsManager.getDefault();
-                DbHelper db = new DbHelper(SensorService.this);
-                List<ContactModel> list = db.getAllContacts();
-
-                for (ContactModel c : list) {
-                    smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
-                }
-            }
-        });
-
-    }
+    public static final float MAX_NET_G_VALUE = 10.0f * SensorManager.GRAVITY_EARTH;
+    public static final int MAX_SHAKE = 3;
+    public static final String ON_SHAKE_MESSAGE =
+            "I am in DANGER, I need help. This message was sent from NEMO App recognizing my situation.";
+    public static final String ON_HIT_MESSAGE =
+            "I guess my Phone got hit due to some reason. This message was sent from NEMO App recognizing my situation.";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -108,9 +64,54 @@ public class SensorService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+
+        new Thread(() -> {
+
+            try {
+                while (true) {
+
+                    // create FusedLocationProviderClient to get the user location
+                    FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
+                    // use the PRIORITY_BALANCED_POWER_ACCURACY
+                    // so that the service doesn't use unnecessary power via GPS
+                    // it will only use GPS at this very moment
+                    fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
+                        @Override
+                        public boolean isCancellationRequested() {
+                            return false;
+                        }
+
+                        @NonNull
+                        @Override
+                        public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                            return null;
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null)
+                                FBUtilKt.updatePhoneLocation(Objects.requireNonNull(PhoneUtilKt.getPhoneNumberInSharedPreferences(SensorService.this)), location);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                        }
+                    });
+
+                    Thread.sleep(10000);
+                }
+            } catch (Exception e) {
+                runOnUIThread(() -> {
+                    Toast.makeText(this, "LOCATION ERROR" + e.toString(), Toast.LENGTH_SHORT).show();
+                });
+            }
+
+        }).start();
 
         return START_STICKY;
     }
@@ -127,39 +128,216 @@ public class SensorService extends Service {
             startForeground(1, new Notification());
 
         // ShakeDetector initialization
-        SensorManager mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        Sensor mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-        // check if the user has shacked
-        // the phone for 3 time in a row
-        ShakeDetector mShakeDetector = new ShakeDetector(new ShakeDetector.OnShakeListener() {
+        mShakeDetector = new ShakeDetector(new ShakeDetector.OnShakeListener() {
 
             @SuppressLint("MissingPermission")
             @Override
             public void onShake(int count) {
                 // check if the user has shacked
                 // the phone for 3 time in a row
-                if (count == MAX_SHAKE) {
-                    doSend(ON_SHAKE_MESSAGE);
+                if (count == 3) {
+
+                    // vibrate the phone
+                    vibrate();
+
+                    try {
+
+                        // create FusedLocationProviderClient to get the user location
+                        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
+                        // use the PRIORITY_BALANCED_POWER_ACCURACY
+                        // so that the service doesn't use unnecessary power via GPS
+                        // it will only use GPS at this very moment
+                        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
+                            @Override
+                            public boolean isCancellationRequested() {
+                                return false;
+                            }
+
+                            @NonNull
+                            @Override
+                            public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                                return null;
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+
+                                // get the SMSManager
+                                // get the list of all the contacts in Database
+                                // send SMS to each contact
+                                SmsManager smsManager = SmsManager.getDefault();
+                                DbHelper db = new DbHelper(SensorService.this);
+                                List<ContactModel> list = db.getAllContacts();
+
+                                Toast.makeText(SensorService.this, list.isEmpty() ? "Empty Contacts!\nAdd contacts to help" : "SOS MESSAGE SENT", Toast.LENGTH_SHORT).show();
+
+                                String message;
+
+                                if (location != null) {
+                                    for (ContactModel c : list) {
+                                        message = "Hey " + c.getName() + ", I am in DANGER, I need help. Please urgently reach me out. Here are my coordinates.\n" + "http://maps.google.com/?q=" + location.getLatitude() + "," + location.getLongitude();
+                                        smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
+                                    }
+                                } else {
+                                    for (ContactModel c : list) {
+                                        message = "Hey " + c.getName() + ", I am in DANGER, I need help. Please urgently reach me out.\n" + "GPS was turned off. Couldn't find location. Call your nearest Police Station.";
+                                        smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
+                                    }
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d("Check: ", "OnFailure");
+                                String message = "I am in DANGER, i need help. Please urgently reach me out.\n" + "GPS was turned off.Couldn't find location. Call your nearest Police Station.";
+
+                                SmsManager smsManager = SmsManager.getDefault();
+                                DbHelper db = new DbHelper(SensorService.this);
+                                List<ContactModel> list = db.getAllContacts();
+
+                                for (ContactModel c : list) {
+                                    smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
+                                }
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        Toast.makeText(SensorService.this, e.toString(), Toast.LENGTH_LONG).show();
+                    }
+
                 }
             }
         });
-        ForceDetector mForceDetector = new ForceDetector(new ForceDetector.ForceListener() {
+        mForceDetector = new ForceDetector(new ForceDetector.ForceListener() {
+
+            @SuppressLint("MissingPermission")
             @Override
             public void onHit(float gX, float gY, float gZ) {
+
                 double netG = ForceDetectorKt.getNetForce(gX, gY, gZ);
 
                 if (netG >= MAX_NET_G_VALUE) {
-                    doSend(ON_HIT_MESSAGE);
-                }
+                    // vibrate the phone
+                    vibrate();
 
+                    // create FusedLocationProviderClient to get the user location
+                    FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
+                    // use the PRIORITY_BALANCED_POWER_ACCURACY
+                    // so that the service doesn't use unnecessary power via GPS
+                    // it will only use GPS at this very moment
+                    fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
+                        @Override
+                        public boolean isCancellationRequested() {
+                            return false;
+                        }
+
+                        @NonNull
+                        @Override
+                        public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                            return null;
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+
+                            // get the SMSManager
+                            // get the list of all the contacts in Database
+                            // send SMS to each contact
+                            SmsManager smsManager = SmsManager.getDefault();
+                            DbHelper db = new DbHelper(SensorService.this);
+                            List<ContactModel> list = db.getAllContacts();
+
+                            Toast.makeText(SensorService.this, list.isEmpty() ? "Empty Contacts!\nAdd contacts to help" : "SOS MESSAGE SENT", Toast.LENGTH_SHORT).show();
+
+                            String message;
+
+                            if (location != null) {
+                                for (ContactModel c : list) {
+                                    message = "Hey, " + c.getName() + ", My Phone got hit. I am in DANGER and need HELP. Here are my coordinates.\n" + "http://maps.google.com/?q=" + location.getLatitude() + "," + location.getLongitude();
+                                    smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
+                                }
+                            } else {
+                                for (ContactModel c : list) {
+                                    message = "Hey " + c.getName() + ", My Phone got hit. I am in DANGER and need HELP. Please urgently reach me out.\n" + "GPS was turned off. Couldn't find location.";
+                                    smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
+                                }
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("Check: ", "OnFailure");
+                            String message = "My Phone got hit. I am in DANGER and need HELP. Please urgently reach me out.\n" + "GPS was turned off. Couldn't find location.";
+
+                            SmsManager smsManager = SmsManager.getDefault();
+                            DbHelper db = new DbHelper(SensorService.this);
+                            List<ContactModel> list = db.getAllContacts();
+
+                            for (ContactModel c : list) {
+                                smsManager.sendTextMessage(c.getPhoneNo(), null, message, null, null);
+                            }
+                        }
+                    });
+
+                }
             }
         });
 
         // register the listener
         mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
         mSensorManager.registerListener(mForceDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
+
+        Log.e("OK", "ooohhhhhhh");
     }
+
+//    public void onCreate() {
+//
+//        super.onCreate();
+//
+//        // start the foreground service
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+//            startMyOwnForeground();
+//        else
+//            startForeground(1, new Notification());
+//
+//        // ShakeDetector initialization
+//        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+//        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//
+//        // check if the currentFirebaseUser has shacked
+//        // the phone for 3 time in a row
+//        mShakeDetector = new ShakeDetector(new ShakeDetector.OnShakeListener() {
+//
+//            @Override
+//            public void onShake(int count) {
+//                // check if the currentFirebaseUser has shacked
+//                // the phone for 3 time in a row
+//                if (count == MAX_SHAKE) {
+//                    doSend(ON_SHAKE_MESSAGE);
+//                }
+//            }
+//        });
+//        mForceDetector = new ForceDetector(new ForceDetector.ForceListener() {
+//            @Override
+//            public void onHit(float gX, float gY, float gZ) {
+//                double netG = ForceDetectorKt.getNetForce(gX, gY, gZ);
+//
+//                if (netG >= MAX_NET_G_VALUE) {
+//                    doSend(ON_HIT_MESSAGE);
+//                }
+//
+//            }
+//        });
+//
+//        // register the listener
+//        mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
+//        mSensorManager.registerListener(mForceDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
+//    }
 
     // method to vibrate the phone
     public void vibrate() {

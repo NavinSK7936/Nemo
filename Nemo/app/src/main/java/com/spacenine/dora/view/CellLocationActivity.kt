@@ -26,6 +26,8 @@ import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.spacenine.dora.model.response.CellLocation
 import com.spacenine.dora.utils.getCurrentCellInfo
 import com.spacenine.nemo.R
+import com.spacenine.nemo.util.hide
+import com.spacenine.nemo.util.show
 import kotlinx.android.synthetic.main.activity_cell_location.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
@@ -198,12 +200,4 @@ class CellLocationActivity : AppCompatActivity() {
         val address = addresses[0].getAddressLine(0) // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
         return address //"City: $city\nState: $state\nCountry: $country\nPostalCode: $postalCode\nKnownName: $knownName"
     }
-}
-
-private fun View.show() {
-    visibility = View.VISIBLE
-}
-
-private fun View.hide() {
-    visibility = View.GONE
 }

@@ -5,15 +5,9 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/forceOnPhone"
+        android:id="@+id/deleteContacts"
         app:showAsAction="always"
-        android:title="Force"
-        />
-
-    <item
-        android:id="@+id/myLocation"
-        android:icon="@drawable/ic_baseline_location_on_24"
-        app:showAsAction="always"
-        android:title="My Location"/>
+        android:icon="@drawable/ic_baseline_delete_24"
+        android:title="Delete All" />
 
 </menu>

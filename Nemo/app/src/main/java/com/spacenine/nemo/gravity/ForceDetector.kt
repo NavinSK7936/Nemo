@@ -23,11 +23,12 @@ class ForceDetector(private val onForceListener: ForceListener) : SensorEventLis
         val y = event.values[1]
         val z = event.values[2]
 
-        val gX = x / SensorManager.GRAVITY_EARTH
-        val gY = y / SensorManager.GRAVITY_EARTH
-        val gZ = z / SensorManager.GRAVITY_EARTH
+//        val gX = x / SensorManager.GRAVITY_EARTH
+//        val gY = y / SensorManager.GRAVITY_EARTH
+//        val gZ = z / SensorManager.GRAVITY_EARTH
 
-        onForceListener.onHit(gX, gY, gZ)
+        onForceListener.onHit(x, y, z)
+//        onForceListener.onHit(gX, gY, gZ)
     }
 
 

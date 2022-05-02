@@ -5,5 +5,5 @@
     <string name="button_text_find">Use Cell Tower</string>
     <string name="text_location_format">%f, %f</string>
     <string name="button_text_find_fused">Use GPS</string>
-    <string name="default_web_client_id" translatable="false">137685633631-271g14c1013j2s8ks7fhl81psp05eevr.apps.googleusercontent.com</string>
+    <!--    <string name="default_web_client_id" translatable="false">137685633631-271g14c1013j2s8ks7fhl81psp05eevr.apps.googleusercontent.com</string>-->
 </resources>

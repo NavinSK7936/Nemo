@@ -4,8 +4,11 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,7 +21,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,16 +29,28 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.Credentials;
+import com.google.android.gms.auth.api.credentials.CredentialsClient;
+import com.google.android.gms.auth.api.credentials.CredentialsOptions;
+import com.google.android.gms.auth.api.credentials.HintRequest;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.spacenine.dora.view.CellLocationActivity;
+//import com.spacenine.nemo.bglocation.GeneralService;
+import com.spacenine.nemo.bglocation.UserLocationActivity;
+import com.spacenine.nemo.util.FBUtilKt;
 import com.spacenine.nemo.gravity.GravityActivity;
+import com.spacenine.nemo.magnet.MagnetActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int IGNORE_BATTERY_OPTIMIZATION_REQUEST = 1002;
     private static final int PICK_CONTACT = 1;
+    private static final int CREDENTIAL_PICKER_REQUEST = 2;
 
     // create instances of various classes to be used
     FloatingActionButton button1;
@@ -72,33 +86,34 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // start the service
+        // start the services
         SensorService sensorService = new SensorService();
         if (!isMyServiceRunning(sensorService.getClass())) {
             Intent intent = new Intent(this, sensorService.getClass());
             startService(intent);
         }
 
+//        GeneralService generalService = new GeneralService();
+//        if (!isMyServiceRunning(generalService.getClass())) {
+//            Intent intent = new Intent(this, generalService.getClass());
+//            startService(intent);
+//        }
 
         button1 = findViewById(R.id.Button1);
         listView = (ListView) findViewById(R.id.ListView);
         db = new DbHelper(this);
         list = db.getAllContacts();
-        customAdapter = new CustomAdapter(this, list);
+        customAdapter = new CustomAdapter(this, new Intent(this, UserLocationActivity.class), list);
         listView.setAdapter(customAdapter);
 
         if (list.isEmpty())
             findViewById(R.id.noContactBanner).setVisibility(View.VISIBLE);
 
         button1.setOnClickListener(v -> {
-            // calling of getContacts()
-//            if (db.count() != 5) {
-                Intent intent1 = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                startActivityForResult(intent1, PICK_CONTACT);
-//            } else {
-//                Toast.makeText(MainActivity.this, "Can't Add more than 5 Contacts", Toast.LENGTH_SHORT).show();
-//            }
+            Intent intent1 = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+            startActivityForResult(intent1, PICK_CONTACT);
         });
+
     }
 
     // method to check if the service is running
@@ -127,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 100) {
-            if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 Toast.makeText(this, "Permissions Denied!\n Can't use the App!", Toast.LENGTH_SHORT).show();
             }
         }
@@ -160,6 +175,10 @@ public class MainActivity extends AppCompatActivity {
                                 phones.moveToFirst();
                                 phone = phones.getString(phones.getColumnIndex("data1"));
                             }
+
+//                            Boolean x = db.isPhoneAlreadyAdded(phone);
+//                            Toast.makeText(this, x.toString(), Toast.LENGTH_SHORT).show();
+
                             String name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                             db.addContact(new ContactModel(0, name, phone));
                             list = db.getAllContacts();
@@ -172,10 +191,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 break;
-        }
+            case CREDENTIAL_PICKER_REQUEST:
+                Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
+                Toast.makeText(this, credential.getId(), Toast.LENGTH_SHORT).show();
+                break;
+            }
     }
 
-    // this method prompts the user to remove any
+    // this method prompts the currentFirebaseUser to remove any
     // battery optimisation constraints from the App
     private void askIgnoreOptimization() {
 
@@ -189,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -197,11 +219,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.myLocation:
-                startActivity(new Intent(MainActivity.this, CellLocationActivity.class));
-                return true;
-            case R.id.forceOnPhone:
-                startActivity(new Intent(MainActivity.this, GravityActivity.class));
+            case R.id.deleteContacts:
+                if (db.count() == 0) {
+                    Toast.makeText(this, "Empty Contacts!", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle("Remove All Contacts?")
+                        .setPositiveButton("YES", (dialogInterface, i) -> {
+                            db.deleteAllContacts();
+                            customAdapter.clearAll();
+                            Toast.makeText(this, "All Contacts Removed!", Toast.LENGTH_SHORT).show();
+                            findViewById(R.id.noContactBanner).setVisibility(View.VISIBLE);
+                        })
+                        .setNegativeButton("NO", (DialogInterface.OnClickListener) (dialogInterface, i) -> {
+                        })
+                        .show();
                 return true;
         }
         return super.onOptionsItemSelected(item);

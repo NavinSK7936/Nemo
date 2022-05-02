@@ -52,11 +52,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "137685633631-lv7a18jrkn2sg31tgrttv8v557koa99f.apps.googleusercontent.com",
+          "client_id": "137685633631-6h6r7lusg1h55p4usp540hclban2g9nj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.spacenine.nemo",
-            "certificate_hash": "67f4d41727b4f7ad1640fb9ad052849323784a26"
+            "certificate_hash": "b844b678f507d5d9aa8e6b044c8563f255618a30"
           }
         },
         {

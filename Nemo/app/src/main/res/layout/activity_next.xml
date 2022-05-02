@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".next.NextActivity">
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/userImageView"
+            android:layout_width="115dp"
+            android:layout_height="115dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            app:shapeAppearanceOverlay="@style/UserImageStyle"
+            app:srcCompat="@mipmap/ic_launcher"
+            app:strokeColor="?colorOnBackground"
+            app:strokeWidth="1dp" />
+
+        <TextView
+            android:id="@+id/userText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="152dp"
+            android:layout_marginTop="37dp"
+            android:maxLength="20"
+            android:maxLines="1"
+            android:text="Navin SK"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/phoneNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/userText"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="152dp"
+            android:layout_marginTop="9dp"
+            android:textSize="15dp" />
+
+        <ImageView
+            android:id="@+id/phoneNumberEditButton"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_below="@+id/userText"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="9dp"
+            android:layout_toEndOf="@+id/phoneNumber"
+            android:src="@drawable/ic_baseline_edit_24" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="match_parent"
+        android:layout_height="41dp"
+        android:text="Explore the Barrier Reef!!!"
+        android:textSize="20dp"
+        android:textStyle="italic|bold"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout" />
+
+<!--    <GridLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:columnCount="2"-->
+<!--        android:rowCount="2"-->
+<!--        android:useDefaultMargins="true"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/textView6"-->
+<!--        -->
+<!--        >-->
+
+
+<!--        <ImageView-->
+<!--            android:id="@+id/contactsLabel"-->
+<!--            android:layout_width="174dp"-->
+<!--            android:layout_height="173dp"-->
+<!--            android:src="@drawable/ic_contact_svgrepo_com" />-->
+
+<!--        <ImageView-->
+<!--            android:layout_width="174dp"-->
+<!--            android:layout_height="173dp"-->
+<!--            android:src="@drawable/ic_gravity_svgrepo_com" />-->
+
+<!--        <ImageView-->
+<!--            android:layout_width="174dp"-->
+<!--            android:layout_height="173dp"-->
+<!--            android:src="@drawable/ic_magnet_svgrepo_com" />-->
+
+<!--        <ImageView-->
+<!--            android:layout_width="174dp"-->
+<!--            android:layout_height="173dp"-->
+<!--            android:src="@drawable/ic_location_svgrepo_com" />-->
+
+<!--    </GridLayout>-->
+
+
+
+
+
+    <ImageView
+        android:id="@+id/contactsLabel"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/ic_contact_svgrepo_com"
+        app:layout_constraintEnd_toStartOf="@+id/accelerometerIcon"
+        app:layout_constraintHorizontal_bias="0.141"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="44dp"
+        android:text="Contacts"
+        android:textSize="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/contactsLabel" />
+
+    <ImageView
+        android:id="@+id/accelerometerIcon"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/ic_gravity_svgrepo_com"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.932"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="Accelerometer"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/accelerometerIcon" />
+
+    <ImageView
+        android:id="@+id/magnetometerIcon"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_magnet_svgrepo_com"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/contactsLabel"
+        app:layout_constraintVertical_bias="0.291" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="Magnetometer"
+        android:textSize="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/magnetometerIcon" />
+
+    <ImageView
+        android:id="@+id/myLocationIcon"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_location_svgrepo_com"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/accelerometerIcon"
+        app:layout_constraintVertical_bias="0.291" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="Your Location"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/myLocationIcon" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

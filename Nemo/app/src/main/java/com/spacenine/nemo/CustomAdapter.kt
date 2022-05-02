@@ -2,14 +2,17 @@ package com.spacenine.nemo
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.spacenine.nemo.bglocation.UserLocationActivity
+import com.spacenine.nemo.util.checkForPhoneNumber
 
 
-class CustomAdapter(context: Activity, var contacts: MutableList<ContactModel?>) :
+class CustomAdapter(context: Activity, private val mIntent: Intent, var contacts: MutableList<ContactModel?>) :
     ArrayAdapter<ContactModel?>(context, 0, contacts) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -31,6 +34,32 @@ class CustomAdapter(context: Activity, var contacts: MutableList<ContactModel?>)
         // Lookup view for data population
         val tvName = convertView.findViewById<TextView>(R.id.tvName)
         val tvPhone = convertView.findViewById<TextView>(R.id.tvPhone)
+        val locationView = convertView.findViewById<ImageView>(R.id.locationView)
+
+        locationView.setOnClickListener {
+
+            val successListener = {
+
+                val intent = mIntent.apply {
+                    putExtra(UserLocationActivity.contactNameKey, tvName.text.toString())
+                    putExtra(UserLocationActivity.phoneKey, tvPhone.text.toString())
+                }
+
+                context.startActivity(intent)
+
+            }
+
+            checkForPhoneNumber(tvPhone.text.toString(), successListener) {
+
+                MaterialAlertDialogBuilder(context)
+                    .setTitle("Location not found")
+                    .setMessage("The requested user must install NEMO to track his location")
+                    .setPositiveButton("OK") { dialogInterface, i ->
+                    }.show()
+
+            }
+
+        }
 
         // Populate the data into the template
         // view using the data object
@@ -69,6 +98,11 @@ class CustomAdapter(context: Activity, var contacts: MutableList<ContactModel?>)
     fun refresh(list: List<ContactModel?>?) {
         contacts.clear()
         contacts.addAll(list!!)
+        notifyDataSetChanged()
+    }
+
+    fun clearAll() {
+        contacts.clear()
         notifyDataSetChanged()
     }
 }

@@ -55,32 +55,7 @@
         android:src="@drawable/ic_baseline_add_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="30dp" />
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="50dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-<!--<LinearLayout-->
-<!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--xmlns:tools="http://schemas.android.com/tools"-->
-<!--android:layout_width="match_parent"-->
-<!--android:layout_height="match_parent"-->
-<!--android:orientation="vertical"-->
-<!--tools:context=".MainActivity">-->
-
-<!--    <Button-->
-<!--        android:id="@+id/Button1"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="12dp"-->
-<!--        android:background="#0F9D58"-->
-<!--        android:text="Add Emergency Contact "-->
-<!--        android:textColor="#FFFFFF" />-->
-<!--    -->
-<!--    <ListView-->
-<!--        android:id="@+id/ListView"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent" />-->
-
-<!--</LinearLayout>-->

@@ -5,8 +5,9 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.widget.Toast
 
-class DbHelper(context: Context?) :
+class DbHelper(val context: Context?) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
 
@@ -29,6 +30,15 @@ class DbHelper(context: Context?) :
         db.close()
     }
 
+    fun isPhoneAlreadyAdded(phone: String): Boolean {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_NAME WHERE $PHONENO=?"
+        val c: Cursor = db.rawQuery(query, arrayOf(phone))
+        val exists = c.count > 0
+        c.close()
+        return exists
+    }
+
     // method to retrieve all the contacts in List
     val allContacts: List<ContactModel>
         get() {
@@ -44,7 +54,7 @@ class DbHelper(context: Context?) :
             return list
         }
 
-    // get the count of data, this will allow user
+    // get the count of data, this will allow currentFirebaseUser
     // to not add more that five contacts in database
     fun count(): Int {
         var count = 0
@@ -62,7 +72,13 @@ class DbHelper(context: Context?) :
     // Deleting single country
     fun deleteContact(contact: ContactModel) {
         val db = this.writableDatabase
-        val i = db.delete(TABLE_NAME, KEY_ID + " = ?", arrayOf(contact.id.toString()))
+        val i = db.delete(TABLE_NAME, "$KEY_ID = ?", arrayOf(contact.id.toString()))
+        db.close()
+    }
+
+    fun deleteAllContacts() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_NAME")
         db.close()
     }
 
